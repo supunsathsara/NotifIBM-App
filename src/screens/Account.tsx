@@ -1,11 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
+import ComingSoon from '../components/CommingSoon'
 
 const Account = () => {
   return (
-    <View>
-      <Text>Account</Text>
-    </View>
+    <ComingSoon />
   )
 }
 
