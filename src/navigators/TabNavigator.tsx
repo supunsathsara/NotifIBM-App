@@ -32,7 +32,7 @@ const TabNavigator = () => {
         options={{
           tabBarIcon: ({focused, color, size}) => (
             <Octicons name="home" size={size} color={
-              focused ? '#FFFFFF' : '#4A4A4A'
+              focused ? '#D1F4FF' : '#2F2F2F'
             }
             />
           ),
@@ -44,7 +44,7 @@ const TabNavigator = () => {
         options={{
           tabBarIcon: ({focused, color, size}) => (
             <Octicons name="meter" size={size} color={
-              focused ? '#FFFFFF' : '#4A4A4A'
+              focused ? '#D1F4FF' : '#2F2F2F'
             }
             />
           ),
@@ -56,7 +56,7 @@ const TabNavigator = () => {
         options={{
           tabBarIcon: ({focused, color, size}) => (
             <Octicons name="person" size={size} color={
-              focused ? '#FFFFFF' : '#4A4A4A'
+              focused ? '#D1F4FF' : '#2F2F2F'
             }
             />
           ),
@@ -69,7 +69,7 @@ const TabNavigator = () => {
 
 const styles = StyleSheet.create({
   tabBarStyle: {
-    height: 80,
+    height: 60,
     position: 'absolute',
     borderTopWidth: 0,
     elevation: 0,
