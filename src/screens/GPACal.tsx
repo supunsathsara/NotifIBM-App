@@ -1,9 +1,11 @@
 import axios from 'axios';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Button, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import Icon from 'react-native-vector-icons/Octicons';
 import LottieView from 'lottie-react-native';
+import { Button, Card, Paragraph, Text, Title, Avatar, IconButton, TextInput, HelperText } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 const GPACal = () => {
@@ -29,37 +31,37 @@ const GPACal = () => {
     const [refreshing, setRefreshing] = useState(false);
 
     const fetchData = useCallback(async () => {
-      setIsFetchingLists(true);
-      try {
-          const response = await axios.get('https://notifibm.com/api/gpa/programs');
-          const transformedData = response.data.map(program => ({
-              label: program.name,
-              value: program.web_value.toString(),
-          }));
-          setProgramList(transformedData);
-      } catch (error) {
-          console.error('There was an error fetching the data: ', error);
-      } finally {
-          setIsFetchingLists(false);
-      }
-  }, []);
+        setIsFetchingLists(true);
+        try {
+            const response = await axios.get('https://notifibm.com/api/gpa/programs');
+            const transformedData = response.data.map(program => ({
+                label: program.name,
+                value: program.web_value.toString(),
+            }));
+            setProgramList(transformedData);
+        } catch (error) {
+            console.error('There was an error fetching the data: ', error);
+        } finally {
+            setIsFetchingLists(false);
+        }
+    }, []);
 
-  useEffect(() => {
-      fetchData();
-  }, [fetchData]);
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
 
     const onRefresh = useCallback(() => {
-      setRefreshing(true);
-      //update to init state
-      setGPA(null);
-      setGPA2(null)
-      setCourses([])
-      setProgram(null)
-      setBatch(null)
-      setStudent(null)
-      fetchData().then(() => setRefreshing(false));
-  }, [fetchData]);
+        setRefreshing(true);
+        //update to init state
+        setGPA(null);
+        setGPA2(null)
+        setCourses([])
+        setProgram(null)
+        setBatch(null)
+        setStudent(null)
+        fetchData().then(() => setRefreshing(false));
+    }, [fetchData]);
 
 
     useEffect(() => {
@@ -122,7 +124,7 @@ const GPACal = () => {
         setIsLoading(true);
         setGPA(null);
         setGPA2(null);
-        
+
 
         try {
             const response = await fetch('https://notifibm.com/api/gpa', {
@@ -150,21 +152,20 @@ const GPACal = () => {
     }
 
     return (
-        <View style={styles.container}>
-            <ScrollView
-            refreshControl={
-              <RefreshControl
-                  refreshing={refreshing}
-                  onRefresh={onRefresh}
-              />
-          }
+        <SafeAreaView style={styles.safeArea}>
+            <ScrollView style={styles.container} contentContainerStyle={styles.scrollViewContent}
+                refreshControl={
+                  <RefreshControl
+                      refreshing={refreshing}
+                      onRefresh={onRefresh}
+                  />
+              }
             >
+
                 <View style={styles.headerContainer}>
-                <View style={styles.headerInnerContainer}>
-                    <Icon name="number" size={25} color="#00BFFF" />
-                    <Text style={styles.header}>GPA Calculator</Text>              
-                </View>
-                <LottieView style={styles.lottie} source={require('../assets/animations/welcome.json')} autoPlay loop />
+                    <Icon name="number"  color='#00BFFF' size={25} />
+                    <Title style={styles.header}>GPA Calculator</Title>
+                    <LottieView source={require('../assets/animations/welcome.json')} autoPlay loop style={styles.lottie} />
                 </View>
                 <Dropdown
                     style={[styles.dropdown, isProgramFocus && { borderColor: "#00BFFF" }]}
@@ -242,62 +243,77 @@ const GPACal = () => {
                 />
 
                 <Button
-                    title={isLoading ? 'Calculating...' : 'Calculate GPA'}
+                    mode="contained"
+                    loading={isLoading}
                     onPress={handleSubmit}
                     disabled={isLoading || isFetchingLists}
-                    color="#00B2ED"
-                />
+                    style={styles.button}
+                    icon="calculator"
+                >
+                    Calculate GPA
+                </Button>
 
                 {isLoading ? (
-                    <View
-                    style={{marginTop:25}}
-                    >
-                    <ActivityIndicator size="large" color="#FFFFFF"/>
-                    </View>
+                    <ActivityIndicator size="large" style={styles.loader} />
                 ) : (
                     <View style={styles.resultContainer}>
-                        {gpa !== null && (
-                            <View style={styles.gpaContainer}>
-
-                                <Text style={styles.gpaText}>GPA: </Text>
-                                <Text style={styles.gpaValue}>{gpa.toFixed(2)}</Text>
-                                <Icon name="star" size={20} color={gpa >= 3.5 ? '#00BFFF' : '#FFFFFF'}
-                                    style={{ marginLeft: 5 }}
-                                />
-                            </View>
-                        )}
-                        {gpa2 !== null && (
-                            <View style={styles.gpaContainer}>
-                                <Text style={styles.gpaText}>{gpa2.toFixed(2)} </Text>
-                                <Text style={styles.gpaNote}>(without repeated courses)</Text>
-                            </View>
-                        )}
-
-                        {/* Course list rendering */}
-                        {courses?.length > 0
-                            && courses?.map((course, index) => (
-                                <View key={index} style={styles.courseContainer}>
-                                    <Text style={styles.courseText}>{course?.Subject}</Text>
-                                    <Text style={styles.courseText}>Grade: {course?.FinalGrade}</Text>
-                                </View>
-                            ))}
+                        <View style={styles.gpaContainer}>
+                            {gpa !== null && (
+                                <Card style={styles.gpaCard}>
+                                    <Card.Title
+                                        title="GPA"
+                                        subtitle="Current GPA"
+                                        titleStyle={styles.cardTitle}
+                                        subtitleStyle={styles.cardSubtitle}
+                                        left={(props) => <Avatar.Icon {...props} icon="star" color="#FFD700"
+                                            style={{ backgroundColor: '#485768' }}
+                                        />}
+                                    />
+                                    <Card.Content>
+                                        <Title style={styles.cardContentTitle}>{gpa.toFixed(2)}</Title>
+                                    </Card.Content>
+                                </Card>
+                            )}
+                            {gpa2 !== null && (
+                                <Card style={styles.gpaCard}>
+                                    <Card.Title
+                                        title="GPA without repeats"
+                                        subtitle="Calculated without repeated courses"
+                                        titleStyle={styles.cardTitle}
+                                        subtitleStyle={styles.cardSubtitle}
+                                        left={(props) => <Avatar.Icon {...props} icon="star-outline" color="#B0BEC5" style={{ backgroundColor: '#485768' }} />}
+                                    />
+                                    <Card.Content>
+                                        <Title style={styles.cardContentTitle}>{gpa2.toFixed(2)}</Title>
+                                    </Card.Content>
+                                </Card>
+                            )}
+                        </View>
+                        {courses.length > 0 && courses.map((course, index) => (
+                            <Card key={index} style={styles.courseCard}>
+                                <Card.Content>
+                                    <Paragraph style={styles.courseText}>{course.Subject}</Paragraph>
+                                    <Paragraph style={styles.courseText}>Grade: {course.FinalGrade}</Paragraph>
+                                </Card.Content>
+                            </Card>
+                        ))}
                     </View>
                 )}
             </ScrollView>
-        </View>
+        </SafeAreaView>
     );
 };
 
 export default GPACal;
 
 const styles = StyleSheet.create({
-    //   container: {
-    //     padding: 16,
-    //     backgroundColor: 'white',
-    //     flex: 1,
-    //     justifyContent: 'center',
-    //     alignContent: 'center',
-    //   },
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#1A232E',
+    },
+    scrollViewContent: {
+        paddingBottom: 100, // Add sufficient padding to scroll above the navigator
+    },
     dropdown: {
         height: 50,
         borderWidth: 0.5,
@@ -333,22 +349,6 @@ const styles = StyleSheet.create({
         height: 40,
         fontSize: 16,
     },
-    container: {
-        flex: 1,
-        padding: 16,
-        backgroundColor: '#1A232E',
-        paddingTop: 30,
-        paddingBottom: 100,
-        justifyContent: 'center',  // Centers children vertically in the container
-        alignItems: 'center',      // Centers children horizontally in the container
-        width:'auto'
-    },
-    gpaContainer: {
-        flexDirection: 'row', // Aligns items in a row
-        alignItems: 'center', // Centers items vertically
-        marginBottom: 8,       // Adds a bit of margin between the two GPAs
-
-    },
     gpaText: {
         color: '#FFFFFF', // White text for dark theme
         fontSize: 18,
@@ -371,34 +371,73 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         marginVertical: 5,
     },
-    courseText: {
-        color: '#FFFFFF', // White text for dark theme
-        fontSize: 16,
-    },
-    resultContainer: {
-        marginTop: 20,
-        width: '90%',
-        minWidth: '90%'
-    },
-    headerContainer: {
-        flexDirection: 'column', // Aligns the icon and text horizontally
-        alignItems: 'center', // Centers items vertically in the row
-        justifyContent: 'center', // Centers the entire block in its container
-        padding: 10, // Adds padding around the content for spacing
-        paddingBottom: 20, // Adds more space between the header and the dropdown
-    },
+
     headerInnerContainer: {
         flexDirection: 'row', // Aligns the icon and text horizontally
         alignItems: 'center', // Centers items vertically in the row
     },
+
+    container: {
+        flex: 1,
+        backgroundColor: '#1A232E',
+        padding: 16,
+    },
+    headerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     header: {
-        color: '#FFFFFF', // White text suitable for dark themes
-        fontSize: 24, // Larger font size for headers
-        fontWeight: 'bold', // Makes the text bold
-        marginLeft: 10, // Adds space between the icon and the text
+        color: '#FFFFFF',
+        marginLeft: 10,
+    },
+    button: {
+        marginVertical: 10,
+    },
+    loader: {
+        marginTop: 20,
+    },
+    resultContainer: {
+        padding: 10,
+    },
+    resultCard: {
+        marginVertical: 8,
+    },
+    courseCard: {
+        marginVertical: 4,
+        backgroundColor: '#293543',
+    },
+    courseText: {
+        color: '#FFFFFF',
     },
     lottie: {
-        width: 150,
-        height: 150,
+        width: 100,
+        height: 100,
+    },
+    gpaContainer: {
+        flexDirection: 'row',  // Arrange items horizontally
+        justifyContent: 'space-evenly',  // Evenly space items across the container
+        flexWrap: 'wrap',  // Allow items to wrap in smaller screens
+        alignItems: 'center',  // Align items vertically in the center
+        marginBottom: 20,
+    },
+    gpaCard: {
+        flex: 1,  // Take up equal space within the row
+        margin: 8,  // Add some margin between cards
+        minWidth: 160,  // Minimum width for each card
+        maxWidth: 340,  // Maximum width to ensure it does not stretch too far on larger screens
+        backgroundColor: '#293543',
+
+    },
+    cardTitle: {
+        color: '#FFFFFF',  // White text for titles
+    },
+    cardSubtitle: {
+        color: '#E0E0E0',  // Lighter white (grey) for subtitles
+    },
+    cardContentTitle: {
+        color: '#FFFFFF',  // White text for content titles
+        textAlign: 'center',  // Center the text within the card
+        fontWeight: 'bold',  // Make the text bold
     },
 });
